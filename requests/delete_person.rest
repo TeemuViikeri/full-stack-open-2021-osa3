@@ -1,1 +1,1 @@
-DELETE http://localhost:3001/api/persons/4/
+DELETE https://phonebook-viikeri.herokuapp.com/api/persons/9052024/
