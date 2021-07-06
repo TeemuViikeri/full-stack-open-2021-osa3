@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:ui": "rm -rf build && cc ../osa2/puhelinluettelo && npm run build --prod && cp -r build ../../osa3",
+    "deploy": "git push heroku main",
+    "deploy:full": "npm run build:ui && git add . && git commit -m Add new build && git push && npm run deploy",
+    "logs:prod": "heroku logs -t"
   },
   "author": "Teemu Viikeri",
   "license": "ISC",
@@ -14,6 +18,8 @@
     "nodemon": "^2.0.9"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
   }
 }

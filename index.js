@@ -1,6 +1,6 @@
 const express = require('express')
-// Create Express application with improted express() function
-const app = express()
+const cors = require('cors')
+const morgan = require('morgan')
 
 // Hard coded array of persons in the phonebook
 let persons = [
@@ -26,18 +26,23 @@ let persons = [
   },
 ]
 
-// Use a json-parser to parse JSON requests into JavaScript objects
+// Create an Express application
+const app = express()
+// Use a json-parser middleware to parse JSON requests into JavaScript objects
 app.use(express.json())
 
-const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method)
-  console.log('Path:  ', request.path)
-  console.log('Body:  ', request.body)
-  console.log('---')
-  next()
-}
+// Use CORS enabling middleware
+app.use(cors())
 
-app.use(requestLogger)
+// Create new token for logging
+morgan.token('data', (req, res) => JSON.stringify(req.body))
+
+// Use morgan logger middleware
+// Logs in tiny + data token format
+// tiny format outputs ':method :url :status :res[content-length] - :response-time ms'
+app.use(
+  morgan(':method :url :status :res[content-length] - :response-time ms :data')
+)
 
 // Route for getting all persons in the phonebook
 app.get('/api/persons', (req, res) => {
@@ -72,6 +77,8 @@ const generateId = () => {
 // Route for adding a new person
 app.post('/api/persons', (req, res) => {
   const body = req.body
+  console.log(body)
+
   const personExistsAlready = persons.some((p) => p.name === body.name)
 
   if (!body.name) {
@@ -115,6 +122,7 @@ app.delete('/api/persons/:id', (req, res) => {
   }
 })
 
+// Route for unknown endpoints
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
@@ -122,7 +130,7 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 // Initialize a constant variable for a port
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 // Runs a server that listens to PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
