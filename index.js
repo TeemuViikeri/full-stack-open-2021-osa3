@@ -28,14 +28,18 @@ let persons = [
 
 // Create an Express application
 const app = express()
+000
 // Use a json-parser middleware to parse JSON requests into JavaScript objects
 app.use(express.json())
+
+// Serve static frontend build for Express
+app.use(express.static('build'))
 
 // Use CORS enabling middleware
 app.use(cors())
 
 // Create new token for logging
-morgan.token('data', (req, res) => JSON.stringify(req.body))
+morgan.token('data', (req, res, next) => JSON.stringify(req.body))
 
 // Use morgan logger middleware
 // Logs in tiny + data token format
@@ -123,13 +127,14 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 // Route for unknown endpoints
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'Unknown endpoint' })
 }
 
+// Use unknownEndpoint route
 app.use(unknownEndpoint)
 
-// Initialize a constant variable for a port
+// Use PORT environment variable inserted by Heroku in production or use 3001 during dev
 const PORT = process.env.PORT || 3001
 // Runs a server that listens to PORT
 app.listen(PORT, () => {
