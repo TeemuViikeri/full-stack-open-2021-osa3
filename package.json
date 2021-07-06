@@ -7,9 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "rm -rf build && cc ../osa2/puhelinluettelo && npm run build --prod && cp -r build ../../osa3",
+    "build:ui": "rm -rf build && cd ../osa2/puhelinluettelo && npm run build --prod && cp -r build ../../osa3",
     "deploy": "git push heroku main",
-    "deploy:full": "npm run build:ui && git add . && git commit -m Add new build && git push && npm run deploy",
+    "deploy:full": "npm run build:ui && git add . && git commit -m 'Add new build' && git push && npm run deploy",
     "logs:prod": "heroku logs -t"
   },
   "author": "Teemu Viikeri",
