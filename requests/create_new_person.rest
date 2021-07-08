@@ -1,6 +1,5 @@
 POST https://phonebook-viikeri.herokuapp.com/api/persons/
 content-type: application/json
-
 { 
 	"name": "Teemu Viikeri",
 	"number": "+358451338951"

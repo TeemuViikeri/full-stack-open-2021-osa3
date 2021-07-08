@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+const Person = require('./models/person')
 
 // Hard coded array of persons in the phonebook
 let persons = [
@@ -28,7 +30,7 @@ let persons = [
 
 // Create an Express application
 const app = express()
-000
+
 // Use a json-parser middleware to parse JSON requests into JavaScript objects
 app.use(express.json())
 
@@ -39,7 +41,7 @@ app.use(express.static('build'))
 app.use(cors())
 
 // Create new token for logging
-morgan.token('data', (req, res, next) => JSON.stringify(req.body))
+morgan.token('data', (req, res) => JSON.stringify(req.body))
 
 // Use morgan logger middleware
 // Logs in tiny + data token format
@@ -50,14 +52,16 @@ app.use(
 
 // Route for getting all persons in the phonebook
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then((people) => res.json(people))
 })
 
 // Route for sending info of amount of people in the phonebook and current time
 app.get('/info', (req, res) => {
-  const info = `<div>Phonebook has info for ${persons.length} people</div>`
-  const time = `<div>${new Date()}</div>`
-  res.send(`${info}${time}`)
+  Person.find({}).then((people) => {
+    const info = `<div>Phonebook has info for ${people.length} people</div>`
+    const time = `<div>${new Date()}</div>`
+    res.send(`${info}${time}`)
+  })
 })
 
 // Route for showing a single number
@@ -67,7 +71,7 @@ app.get('/api/persons/:id', (req, res) => {
   const person = persons.find((p) => p.id === id)
 
   if (person) {
-    res.json(person)
+    res.status(200).json(person)
   } else {
     res.status(404).end()
   }
@@ -81,32 +85,66 @@ const generateId = () => {
 // Route for adding a new person
 app.post('/api/persons', (req, res) => {
   const body = req.body
-  console.log(body)
 
-  const personExistsAlready = persons.some((p) => p.name === body.name)
+  Person.find({}).then((people) => {
+    // Function for checking if the person exists
+    const personExistsAlready = people.some(
+      (person) => person.name === body.name
+    )
 
-  if (!body.name) {
-    return res.status(400).json({
-      error: 'name missing',
+    // Send an error message if request doesn't include a name, a number or the person exists already
+    if (!body.name) {
+      return res.status(400).json({
+        message: 'name missing',
+      })
+    } else if (!body.number) {
+      return res.status(400).json({
+        message: 'number missing',
+      })
+    } else if (personExistsAlready) {
+      return res.status(400).json({
+        message: 'person with given name already exists',
+      })
+    }
+
+    // Create an object of the new person
+    const person = new Person({
+      name: body.name,
+      number: body.number,
     })
-  } else if (!body.number) {
-    return res.status(400).json({
-      error: 'number missing',
+
+    // Add person to the phonebook
+    person.save().then((returnedPerson) => {
+      console.log(
+        `Added ${returnedPerson.name}${
+          returnedPerson.number === ''
+            ? returnedPerson.number
+            : ` number ${returnedPerson.number}`
+        } to phonebook`
+      )
     })
-  } else if (personExistsAlready) {
-    return res.status(400).json({
-      error: 'person with given name already exists',
-    })
+
+    res.status(200).json(person)
+  })
+})
+
+// Route for changing person's  property
+app.put('/api/persons/:id', (req, res) => {
+  // Id in request is a string, conver to Number!
+  const id = Number(req.params.id)
+  const body = req.body
+
+  // Function for checking if person with given id exists in the phonebook
+  const personExists = persons.some((p) => p.id === id)
+
+  // Either modify existing person or add a new one
+  if (personExists) {
+    persons = persons.map((p) => (p.id === id ? body : p))
+    res.status(200).send(body)
+  } else {
+    persons = persons.concat(body)
+    res.status(201).send(body)
   }
-
-  const person = {
-    name: body.name,
-    number: body.number,
-    id: generateId(),
-  }
-
-  persons = persons.concat(person)
-  res.json(person)
 })
 
 // Route for deleting a single person
