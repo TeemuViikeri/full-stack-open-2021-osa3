@@ -18,7 +18,7 @@ app.use(express.static('build'))
 app.use(cors())
 
 // Create new token for logging
-morgan.token('data', (req, res) => JSON.stringify(req.body))
+morgan.token('data', (req) => JSON.stringify(req.body))
 
 // Use morgan logger middleware
 // Logs in tiny + data token format
