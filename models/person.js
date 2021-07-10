@@ -1,8 +1,7 @@
 const mongoose = require('mongoose')
+const validator = require('mongoose-unique-validator')
 
 const uri = process.env.MONGODB_URI
-
-console.log('Connecting to ', uri)
 
 // Connect to MongoDB database
 mongoose
@@ -17,9 +16,20 @@ mongoose
 
 // Create a schema for person documents
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    minlength: 3,
+  },
+  number: {
+    type: String,
+    unique: true,
+    minlength: 8,
+  },
 })
+
+personSchema.plugin(validator)
 
 // Apply these changes to JSON document sent from the database
 // toJSON is called by JSON.stringify()
