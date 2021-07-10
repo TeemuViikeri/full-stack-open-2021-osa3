@@ -11,7 +11,7 @@ mongoose
     useFindAndModify: false,
     useCreateIndex: true,
   })
-  .then((res) => console.log('Connected MongoDB'))
+  .then(() => console.log('Connected MongoDB'))
   .catch((err) => console.log('Error connecting to MongoDB:', err.message))
 
 // Create a schema for person documents
