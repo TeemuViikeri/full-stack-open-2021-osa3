@@ -10,7 +10,7 @@ if (process.argv.length < 3) {
 const password = process.argv[2]
 const uri = `mongodb+srv://fullstack:${password}@phonebook.l0vhl.mongodb.net/phonebook?retryWrites=true&w=majority`
 
-mongoose.connect(url, {
+mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
